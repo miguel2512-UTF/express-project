@@ -1,0 +1,19 @@
+{
+  "name": "express-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "author": "miguel2512-UTF",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "md5": "^2.3.0",
+    "nodemon": "^2.0.22",
+    "sqlite3": "^5.1.6"
+  }
+}
