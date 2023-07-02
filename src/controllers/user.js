@@ -1,6 +1,6 @@
 const db = require("../db")
 const md5 = require("md5")
-const { getUserByid, insertUser, updateUser } = require("../helpers/user")
+const { getUserByid, insertUser, updateUser, deleteUser } = require("../helpers/user")
 
 const getAllUsers = (req, res) => {
     let sql = "SELECT * FROM user"
@@ -93,9 +93,38 @@ const editUser = async (req, res, next) => {
     })
 }
 
+const removeUser = async (req, res) => {
+    const id = req.params.id
+
+    const userExist = await getUserByid(id)
+    
+    if (!userExist) {
+        return res.status(404).json({
+            status: res.statusCode,
+            message: "User not found"
+        })
+    }
+
+    const success = await deleteUser(id)
+    
+    if (!success) {
+        return res.status(400).json({
+            status: res.statusCode,
+            message: "User couldn't be deleted",
+            error: success.message
+        })
+    }
+
+    return res.status(200).json({
+        status: res.statusCode,
+        message: "User deleted successfully"
+    })
+}
+
 module.exports = {
     getAllUsers,
     getUser,
     createUser,
-    editUser
+    editUser,
+    removeUser
 }

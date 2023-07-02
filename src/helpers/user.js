@@ -56,8 +56,26 @@ const updateUser = (user) => {
     })
 }
 
+const deleteUser = (id) => {
+    return new Promise((resolve, reject) => {
+        db.run("DELETE FROM user WHERE id = ?", [id], (err) => {
+            if (err) {
+                resolve({
+                    success: false,
+                    message: err.message
+                })
+            }
+
+            resolve({
+                success: true
+            })
+        })
+    })
+}
+
 module.exports = {
     getUserByid,
     insertUser,
-    updateUser
+    updateUser,
+    deleteUser
 }
