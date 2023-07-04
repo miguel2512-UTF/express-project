@@ -1,6 +1,19 @@
-const { ERROR } = require("sqlite3")
 const db = require("../db")
 const md5 = require("md5")
+
+const findAllUsers = () => {
+    return new Promise(resolve => {
+        let sql = "SELECT * FROM user"
+
+        db.all(sql, [], (err, data) => {
+            if (err) {
+                resolve(err)
+            }
+            
+            resolve(data)
+        })
+    })
+} 
 
 const getUserByid = (id) => {
     return new Promise(resolve => {
@@ -74,6 +87,7 @@ const deleteUser = (id) => {
 }
 
 module.exports = {
+    findAllUsers,
     getUserByid,
     insertUser,
     updateUser,

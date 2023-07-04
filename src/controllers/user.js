@@ -1,20 +1,20 @@
 const db = require("../db")
 const md5 = require("md5")
-const { getUserByid, insertUser, updateUser, deleteUser } = require("../helpers/user")
+const { findAllUsers, getUserByid, insertUser, updateUser, deleteUser } = require("../helpers/user")
 
-const getAllUsers = (req, res) => {
-    let sql = "SELECT * FROM user"
-    let params = []
-    db.all(sql, params, (err, rows) => {
-        if (err) {
-            return res.status().json({ error: err })
-        }
-        else {
-            return res.json({
-                length: rows.length,
-                data: rows
-            })
-        }
+const getAllUsers = async (req, res) => {
+    const users = await findAllUsers()
+
+    if (!users) {
+        return res.status(500).json({
+            status: res.statusCode,
+            message: users.message
+        })
+    }
+
+    return res.status(200).json({
+        status: res.statusCode,
+        data: users
     })
 }
 
