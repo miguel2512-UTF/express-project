@@ -1,5 +1,6 @@
 const db = require("../db")
 const md5 = require("md5")
+const con = require("./test")
 
 const findAllUsers = () => {
     return new Promise(resolve => {
