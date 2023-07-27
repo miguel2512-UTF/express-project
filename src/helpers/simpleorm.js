@@ -11,26 +11,42 @@ const DATA_TYPES = {
     BLOB: 'BLOB',
 }
 
+function getProperties(object) {
+    let properties = Object.getOwnPropertyNames(object)
+    properties = properties.map(el => {
+        return {
+            nullable: true,
+            constraints: {
+                primary_key: false,
+                auto_increment: false,
+                unique: false
+            },
+            ...object[el]
+        }
+    })
+
+    return properties
+}
+
 class SimpleOrm {
+    static childs = new Set()
 
     init() {
-        let properties = this.getProperties()
+        const childName = this.constructor.name
 
-        properties = properties.map(el => {
-            return {
-                nullable: true,
-                constraints: {
-                    primary_key: false,
-                    auto_increment: false,
-                    unique: false
-                },
-                ...this[el]
-            }
-        })
-        console.log(properties);
-        const sql = properties.map(el => `${el.field} ${el.type} ${!el.nullable ? "NOT NULL" : ""} ${el.constraints["primary_key"] ? "PRIMARY KEY" : ""} ${el.constraints["auto_increment"] ? "AUTOINCREMENT" : ""} ${el.constraints["unique"] ? "UNIQUE" : ""}`).join(",")
+        if (SimpleOrm.childs.has(childName)) return
 
-        console.log(sql);
+        const properties = getProperties(this)
+
+        const sql = properties.map(el => {
+            const isNullable = !el.nullable ? "NOT NULL" : ""
+            const isPrimaryKey = el.constraints["primary_key"] ? "PRIMARY KEY" : ""
+            const isAutoIncrement = el.constraints["auto_increment"] ? "AUTOINCREMENT" : ""
+            const isUnique = el.constraints["unique"] ? "UNIQUE" : ""
+
+            return `${el.field} ${el.type} ${isNullable} ${isPrimaryKey} ${isAutoIncrement} ${isUnique}`
+        }).join(",")
+
         db.run(`
         CREATE TABLE IF NOT EXISTS ${this.constructor.name.toLowerCase()} (
             ${sql}
@@ -40,14 +56,8 @@ class SimpleOrm {
                 console.log("Error to Create Table " + err.message);
             }
         })
-    }
 
-    static getProperties() {
-        return Object.getOwnPropertyNames(this)
-    }
-
-    getProperties() {
-        return Object.getOwnPropertyNames(this)
+        SimpleOrm.childs.add(childName)
     }
 
     static findAll() {
@@ -63,6 +73,10 @@ class SimpleOrm {
                 resolve(data)
             })
         })
+    }
+
+    static save() {
+
     }
 }
 

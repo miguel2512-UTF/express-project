@@ -1,7 +1,11 @@
 const db = require("../db")
-const db2 = require("../db2")
+const orm = require("./simpleorm")
 
 const DEBUG = false
+
+if (DEBUG) {
+    const db2 = require("../db2")
+}
 
 const con = DEBUG ? db2 : db
 
@@ -23,4 +27,4 @@ const result = async () => {
     console.log(await con.awaitQuery("SELECT * FROM user"));
 }
 
-result()
+// result()
