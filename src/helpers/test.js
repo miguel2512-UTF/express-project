@@ -1,5 +1,6 @@
 const db = require("../db")
 const orm = require("./simpleorm")
+require("../models/usuario")
 
 const DEBUG = false
 

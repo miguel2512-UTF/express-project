@@ -12,8 +12,7 @@ const DATA_TYPES = {
 }
 
 function getProperties(object) {
-    let properties = Object.getOwnPropertyNames(object)
-    properties = properties.map(el => {
+    const properties = Object.getOwnPropertyNames(object).map(el => {
         return {
             nullable: true,
             constraints: {
@@ -44,7 +43,16 @@ class SimpleOrm {
             const isAutoIncrement = el.constraints["auto_increment"] ? "AUTOINCREMENT" : ""
             const isUnique = el.constraints["unique"] ? "UNIQUE" : ""
 
-            return `${el.field} ${el.type} ${isNullable} ${isPrimaryKey} ${isAutoIncrement} ${isUnique}`
+            const field = [
+                el.field,
+                el.type,
+                isNullable,
+                isPrimaryKey,
+                isAutoIncrement,
+                isUnique
+            ].filter(el => el).join(" ")
+            
+            return field
         }).join(",")
 
         db.run(`
@@ -61,16 +69,48 @@ class SimpleOrm {
     }
 
     static findAll() {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             const name = this.name
             const sql = `SELECT * FROM ${name}`
 
             db.all(sql, [], (err, data) => {
                 if (err) {
-                    resolve(err)
+                    reject(err)
                 }
 
                 resolve(data)
+            })
+        })
+    }
+
+    static find(field, value, limit=1) {
+        return new Promise((resolve, reject) => {
+            db.all(`SELECT * FROM ${this.name} WHERE ${field} = ? LIMIT ${limit}`, [value], (err, data) => {
+                if (err) {
+                    reject(err);
+                }
+
+                if (data.length == 0) resolve(null)
+
+                if (limit ==  1) resolve(data[0])
+
+                resolve(data)
+            })
+        })
+    }
+
+    static delete(id) {
+        return new Promise(async (resolve, reject) => {
+            if (await this.find("id", id) == null) {
+                resolve(false)
+            }
+            
+            db.run(`DELETE FROM ${this.name} WHERE id = ?`, [id], (err) => {
+                if (err) {
+                    reject(err)
+                }
+    
+                resolve(true)
             })
         })
     }
@@ -83,13 +123,10 @@ class SimpleOrm {
 
         console.log(insert);
 
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             db.run(insert, values, (err) => {
                 if (err) {
-                    resolve({
-                        success: false,
-                        message: err.message
-                    })
+                    reject(err)
                 }
 
                 resolve({
@@ -100,55 +137,7 @@ class SimpleOrm {
     }
 }
 
-const config = {
-    id : {
-        field: "id",
-        type: DATA_TYPES.INTEGER,
-        constraints: {
-            primary_key: true,
-            auto_increment: true,
-        }
-    },
-
-    firstname : {
-        field: "firstname",
-        type: DATA_TYPES.VARCHAR,
-        nullable: false
-    },
-
-    lastname : {
-        field: "lastname",
-        type: DATA_TYPES.VARCHAR
-    },
-
-    email : {
-        field: "email",
-        type: DATA_TYPES.VARCHAR,
-        constraints: {
-            unique: true
-        }
-    }
+module.exports = {
+    dataTypes: DATA_TYPES,
+    SimpleModel: SimpleOrm
 }
-
-class Usuario extends SimpleOrm {
-    
-    constructor(id, firstname, lastname, email) {
-        super()
-        Usuario.init(config)
-
-        this.id = id
-        this.firstname = firstname
-        this.lastname = lastname
-        this.email = email
-    }
-}
-
-const user = new Usuario(null, firstname="miguel", lastname="wilchez", email="hfghfda");
-console.log(user);
-
-async function getResult() {
-    const result = await user.save()
-    console.log(result);
-}
-
-getResult()
