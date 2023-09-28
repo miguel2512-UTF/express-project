@@ -1,6 +1,7 @@
 const db = require("../db")
 const orm = require("./simpleorm")
 require("../models/usuario")
+require("../models/product")
 
 const DEBUG = false
 

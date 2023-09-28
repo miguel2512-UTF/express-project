@@ -31,10 +31,12 @@ const config = {
 }
 
 class Usuario extends SimpleModel {
-    
+    static {
+        Usuario.init(config)
+    }
+
     constructor(id, firstname, lastname, email) {
         super()
-        Usuario.init(config)
 
         this.id = id
         this.firstname = firstname
@@ -43,20 +45,8 @@ class Usuario extends SimpleModel {
     }
 }
 
-const user = new Usuario(null, firstname="miguel", lastname="wilchez", email="hfghfda");
-console.log(user);
-
-async function getResult() {
-    try {
-        const result = await user.save()
-        console.log(result);
-    } catch (error) {
-        console.log(error);
-    }
-    const userFind = await Usuario.find("lastname", "wilchez", 2)
-    console.log(userFind);
-    console.log(userFind?.length);
-    console.log(await Usuario.delete(19));
+async function main() {
+    console.log("Users:", await Usuario.findAll());
 }
 
-getResult()
+main()
