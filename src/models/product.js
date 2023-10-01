@@ -7,11 +7,13 @@ const config = {
         constraints: {
             primary_key: true,
             unique: true
-        }
+        },
+        nullable: false
     },
     name: {
         field: "name",
         type: dataTypes.VARCHAR,
+        nullable: false
     },
     description: {
         field: "description",
@@ -34,6 +36,9 @@ class Product extends SimpleModel {
 }
 
 async function main() {
+    Object.defineProperty(Product, "test", {
+        value: "message"
+    })
     console.log("Products:", await Product.findAll());
 }
 

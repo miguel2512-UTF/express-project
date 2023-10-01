@@ -36,6 +36,18 @@ class SimpleOrm {
 
         if (SimpleOrm.#childs.has(childName)) return
 
+        const propertiesOfConstructor = Object.keys(new this)
+        const propertiesOfConfig = Object.keys(config)
+        const differenceBetweenDefinedProperties = []
+        propertiesOfConstructor.forEach((field) => {
+            if (!propertiesOfConfig.includes(field)) {
+                differenceBetweenDefinedProperties.push(field)
+            }
+        })
+        if (differenceBetweenDefinedProperties.length > 0) {
+            throw new Error(`The fields (${differenceBetweenDefinedProperties.join(", ")}) defined in the class ${this.name} have not been defined in the config properties`)
+        }
+        
         const properties = getProperties(config)
 
         this.config = properties
@@ -68,6 +80,7 @@ class SimpleOrm {
             }
 
             this._initialized = true
+            SimpleOrm._initialized = undefined
             SimpleOrm.#childs.add(childName)
         })
     }
@@ -144,10 +157,10 @@ class SimpleOrm {
     }
 
     save() {
-        const properties = Object.keys(this)
+        const properties = this.constructor.config.map(el => el.field)
         const values = Object.values(this)
 
-        const insert = `INSERT INTO ${this.constructor.name.toLocaleLowerCase()} (${properties.join(",")}) VALUES (${properties.map(el => "?").join(",")})`
+        const insert = `INSERT INTO ${this.constructor.name.toLocaleLowerCase()} (${properties.join(",")}) VALUES (${this.constructor.config.map(el => "?").join(",")})`
 
         console.log(insert);
 
