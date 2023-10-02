@@ -27,6 +27,30 @@ function getProperties(object) {
     return properties
 }
 
+function checkPropertiesDefined(propertiesOfConfig, propertiesOfConstructor) {
+    const differenceBetweenDefinedProperties = []
+
+    propertiesOfConstructor.forEach((field) => {
+        if (!propertiesOfConfig.includes(field)) {
+            differenceBetweenDefinedProperties.push(field)
+        }
+    })
+
+    if (differenceBetweenDefinedProperties.length > 0) {
+        throw new Error(`The fields (${differenceBetweenDefinedProperties.join(", ")}) defined in the class ${this.name} have not been defined in the config properties`)
+    }
+
+    propertiesOfConfig.forEach((field) => {
+        if (!propertiesOfConstructor.includes(field)) {
+            differenceBetweenDefinedProperties.push(field)
+        }
+    })
+
+    if (differenceBetweenDefinedProperties.length > 0) {
+        throw new Error(`The fields (${differenceBetweenDefinedProperties.join(", ")}) defined in the config object have not been defined in the constructor of ${this.name} class`)
+    }
+}
+
 class SimpleOrm {
     static #childs = new Set()
     static _initialized = false
@@ -38,16 +62,8 @@ class SimpleOrm {
 
         const propertiesOfConstructor = Object.keys(new this)
         const propertiesOfConfig = Object.keys(config)
-        const differenceBetweenDefinedProperties = []
-        propertiesOfConstructor.forEach((field) => {
-            if (!propertiesOfConfig.includes(field)) {
-                differenceBetweenDefinedProperties.push(field)
-            }
-        })
-        if (differenceBetweenDefinedProperties.length > 0) {
-            throw new Error(`The fields (${differenceBetweenDefinedProperties.join(", ")}) defined in the class ${this.name} have not been defined in the config properties`)
-        }
-        
+        checkPropertiesDefined.call(this, propertiesOfConfig, propertiesOfConstructor)
+
         const properties = getProperties(config)
 
         this.config = properties
